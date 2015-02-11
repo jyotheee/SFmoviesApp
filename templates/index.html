@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+
+		<script src="//maps.googleapis.com/maps/api/js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" type="text/javascript"></script>
+  		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js" type="text/javascript"></script>
+  		<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+		
+	</head>
+	<body>
+		<div class="container">
+			<h1>SF Movies</h1>
+			<div id='movieBox'>
+				<form>
+	  				<input type="text" placeholder="Enter Name of the Movie" id="movie-input"/>
+				</form>
+				<div id='mlist'></div>
+			</div>
+			<div id="googleMap" style="width:500px;height:380px;"></div>
+		</div>
+
+		<script type="text/template" id="movie-list-template">
+			<ul class="list-group" id="movie-list">
+				<% movies.each(function(movie) { %>
+					<li class="list-group-item"><a href="#"><%= movie.get('title') %></a></li>
+				<% }); %>
+			</ul>
+		</script>
+
+		<script>
+
+		$(function() { 
+
+			//Movie model
+			var MovieModel = Backbone.Model.extend({		
+			})
+
+			//Collection of movies
+			var Movies = Backbone.Collection.extend({
+				model: MovieModel,
+				url : '/movies',
+				parse: function(response) {
+					console.log("response", response)
+        			return response.collection;
+    			},
+    			search: function(letters) {
+    				if (letters == "") return this;
+
+    				var pattern = new RegExp(letters, "gi");
+    				return _(this.filter(function(data) {
+    					return pattern.test(data.get('title'));
+    				}));
+    			}
+			});
+
+			//View for movielist
+			var MovieList = Backbone.View.extend({
+				el : '#mlist',
+				tagName : 'ul',
+
+				initialize : function() {
+					console.log("movie list initialize");
+					this.listenTo(this.collection, 'reset sort destroy', this.render);
+				},
+
+				render : function(collection) {
+					console.log("movielist render");
+					var template = _.template($('#movie-list-template').html());
+					this.$el.html( template({movies: collection}) );
+
+				},
+
+				events: {
+					'click li a' : 'onClick'
+				},
+				onClick: function(e) {
+
+						var $anchorElem = $(e.currentTarget);
+						var movieName = $anchorElem.text();
+
+						var movie = this.collection.findWhere({'title': movieName});
+    					console.log("movie title:", movie);
+    					//movie.set('_selected', true);
+    					movie.trigger('selected', movie);
+				}
+			});
+
+			//View for googlemaps
+			var GoogleMap = Backbone.View.extend({
+				el : '#googleMap',
+				markers : [],
+
+				initialize : function() {
+
+					this.collection.on('selected', this.updateMap.bind(this));
+
+					var mapOptions = {
+    									zoom: 11,
+    									center: new google.maps.LatLng(37.7502378, -122.4337029), 
+    									mapTypeId: google.maps.MapTypeId.ROADMAP
+  					};
+  					map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+				},
+
+				updateMap: function(movie) {
+					console.log("markers:", this.markers);
+					var movieLocations = movie.get('location');
+
+					//clear existing markers
+						if (this.markers.length > 0) {
+							for (var i = 0; i < this.markers.length; i++) {
+								this.markers[i].setMap(null);
+							}
+
+							this.markers = [];
+						}	
+
+					//add new markers
+					var that = this;
+					for (var i = 0; i < movieLocations.length; i++) {
+						searchloc = encodeURIComponent(movieLocations[i]+' san francisco, ca');
+						$.get('http://maps.google.com/maps/api/geocode/json?&address='+searchloc, function(response) {
+							pos = response.results[0].geometry.location;
+							var marker = new google.maps.Marker({
+								position: new google.maps.LatLng(pos.lat, pos.lng),
+								map: map,
+								title: movieLocations[i]
+							});
+							that.markers.push(marker);
+						});
+					}
+				}
+			});
+
+			var autocompleteView = Backbone.View.extend({
+				el : "#movie-input",
+
+				initialize : function() {
+					console.log("autocompleteview initialize");
+					this.listenTo(this.collection, 'reset sort destroy', this.render);
+				},
+
+				render : function() {
+					console.log("autocomplete collection:", this.collection);
+					this.$el.bind('keyup', this.search);
+				},
+
+				events: {
+					'keypress #movie-input' : 'search',
+				},
+
+				search: function(e) {
+					
+					//??console.log("this collection:", this.collection);
+					console.log("here");
+					var letters = $("#movie-input").val();
+					console.log("letters:", letters);
+
+					var newcollection = movieColl.search(letters);
+					console.log("new collection:", newcollection);
+
+					//var automovielist = new MovieList({ collection: movieColl.search(letters) });
+					//movieList.render({collection: newcollection});
+					//automovielist.render();
+					//this.render(this.collection.search(letters));
+				}
+			});
+		
+			var Router = Backbone.Router.extend({
+				routes: {
+					'' : 'home'
+				}
+			});
+
+
+			var movieColl = new Movies();  //movies is a collection
+			console.log("moviecoll:", movieColl);
+
+			var movieList = new MovieList({collection: movieColl});
+			var gMap = new GoogleMap({collection: movieColl});
+			var autocompleteview = new autocompleteView({collection: movieColl});
+
+			var router = new Router();
+			router.on('route:home', function() {
+				movieColl.fetch();
+			});
+
+			//var filteredcollection = movieColl.pluck('title');
+			//console.log("filteredcollection:", filteredcollection);	
+			// var fil = movieColl.map(function(model) {
+			// 	return model.get('title');
+			// })
+			// $("#movie-input").autocomplete({
+			// 	source: filteredcollection,
+			// 	minLength : 2,
+			// 	select: function(event, ui) {
+			// 		var selectedmovie = movieColl.where({name: ui.item.value})[0];
+			// 		var movieList = new MovieList({model:selectedmovie});
+			// 		movieList.render();
+			// 	}
+			// });
+
+			Backbone.history.start();
+		})
+		</script>
+
+	</body>
+</html>

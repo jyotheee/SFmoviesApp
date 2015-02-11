@@ -1,0 +1,23 @@
+
+#container
+{
+	width: 100%;
+}
+
+body
+{
+	background-color: #FFE0B2;
+}
+
+#movieBox {
+	width: 300px;
+	margin-left: 0;
+	float: left;
+}
+
+#googleMap {
+	display: inline-block;
+}
+
+
+
