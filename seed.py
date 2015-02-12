@@ -20,7 +20,6 @@ def main(session):
     pass
 
 if __name__ == "__main__":
-    #print sqlite3.__file__
     session=model.connect()
     main(session)
 

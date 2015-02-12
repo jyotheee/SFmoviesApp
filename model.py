@@ -28,7 +28,7 @@ def connect():
 
 def main():
     """In case we need this for something"""
-    pass
+    createTable()
 
 if __name__ == "__main__":
     main()
