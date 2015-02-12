@@ -14,7 +14,7 @@ def index():
 
 @app.route("/movies")
 def getmoviesfromdb():
-    movie_list = model.dbsession.query(model.Movie).limit(20).all()
+    movie_list = model.dbsession.query(model.Movie).all()
     
     # make a dictionary of all the movies
     output = {}
