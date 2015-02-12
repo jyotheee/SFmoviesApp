@@ -13,23 +13,21 @@
 		
 	</head>
 	<body>
-		<div class="container">
-			<h1>SF Movies</h1>
-			<div id='movieBox'>
-				<form>
-	  				<input type="text" placeholder="Enter Name of the Movie" id="movie-input"/>
-				</form>
-				<div id='mlist'></div>
-			</div>
-			<div id="googleMap" style="width:500px;height:380px;"></div>
+		<div class="container" id="content-container">
+				<h1>SF Movies</h1>
+					<div id='movieBox'>
+			  			<input type="text" placeholder="Enter Name of the Movie" id="movie-input"/>
+						
+						<div class='mBox'>
+							<ul id="mlist" class="list"></ul>
+						</div>
+					</div>
+		
+					<div id="googleMap" style="width:500px;height:380px;"></div>
 		</div>
 
-		<script type="text/template" id="movie-list-template">
-			<ul class="list-group" id="movie-list">
-				<% movies.each(function(movie) { %>
-					<li class="list-group-item"><a href="#"><%= movie.get('title') %></a></li>
-				<% }); %>
-			</ul>
+		<script type="text/template" id="movieItem-template">
+			<li class="movieitem"><h4><a href="#"><%= name %></h4></li>
 		</script>
 
 		<script>
@@ -61,34 +59,82 @@
 			//View for movielist
 			var MovieList = Backbone.View.extend({
 				el : '#mlist',
-				tagName : 'ul',
 
 				initialize : function() {
 					console.log("movie list initialize");
 					this.listenTo(this.collection, 'reset sort destroy', this.render);
+					//this.template = _.template($("#movieItem-template").html());
 				},
 
-				render : function(collection) {
+				render : function() {
 					console.log("movielist render");
-					var template = _.template($('#movie-list-template').html());
-					this.$el.html( template({movies: collection}) );
-
+					this.collection.bind('click', this.onClick.bind(this));
+					//console.log("data", data);
+					//$(this.el).html(this.template(data));
 				},
 
 				events: {
 					'click li a' : 'onClick'
 				},
 				onClick: function(e) {
+						console.log("this:", this);
 
 						var $anchorElem = $(e.currentTarget);
 						var movieName = $anchorElem.text();
 
 						var movie = this.collection.findWhere({'title': movieName});
     					console.log("movie title:", movie);
-    					//movie.set('_selected', true);
     					movie.trigger('selected', movie);
 				}
 			});
+
+
+			var autocompleteView = Backbone.View.extend({
+				el : "#movie-input",
+
+				initialize : function() {
+					console.log("autocompleteview initialize");
+					this.listenTo(this.collection, 'reset sort destroy', this.render);
+				},
+
+				render : function() {
+					console.log("autocomplete collection:", this.collection);
+					this.$el.bind('keyup', this.search.bind(this));  
+					this.renderList(this.collection);
+					console.log("rendering of autocomplete done");
+					return this;
+				},
+
+				renderList : function(movies) {
+					$("#mlist").html("");
+					console.log("movies:", movies);
+
+					var that = this;
+
+					movies.each(function(movie){
+						var movieview = new MovieList({
+							model: MovieModel,
+							collection: that.collection
+						});
+						//$("#mlist").append(movieview.render(movie.get('title')));
+						$("#mlist").append('<li><a href="#">'+movie.get('title')+'</a></li>');
+					});
+					return this;
+				},
+
+				events: {
+					'keyup #movie-input' : 'search'
+				},
+
+				search: function(e) {
+					
+					console.log("this collection:", this.collection);
+					var letters = $("#movie-input").val();
+
+					this.renderList(this.collection.search(letters));
+				}
+			});
+
 
 			//View for googlemaps
 			var GoogleMap = Backbone.View.extend({
@@ -137,51 +183,15 @@
 				}
 			});
 
-			var autocompleteView = Backbone.View.extend({
-				el : "#movie-input",
-
-				initialize : function() {
-					console.log("autocompleteview initialize");
-					this.listenTo(this.collection, 'reset sort destroy', this.render);
-				},
-
-				render : function() {
-					console.log("autocomplete collection:", this.collection);
-					this.$el.bind('keyup', this.search);
-				},
-
-				events: {
-					'keypress #movie-input' : 'search',
-				},
-
-				search: function(e) {
-					
-					//??console.log("this collection:", this.collection);
-					console.log("here");
-					var letters = $("#movie-input").val();
-					console.log("letters:", letters);
-
-					var newcollection = movieColl.search(letters);
-					console.log("new collection:", newcollection);
-
-					//var automovielist = new MovieList({ collection: movieColl.search(letters) });
-					//movieList.render({collection: newcollection});
-					//automovielist.render();
-					//this.render(this.collection.search(letters));
-				}
-			});
-		
 			var Router = Backbone.Router.extend({
 				routes: {
 					'' : 'home'
 				}
 			});
 
-
 			var movieColl = new Movies();  //movies is a collection
 			console.log("moviecoll:", movieColl);
 
-			var movieList = new MovieList({collection: movieColl});
 			var gMap = new GoogleMap({collection: movieColl});
 			var autocompleteview = new autocompleteView({collection: movieColl});
 
@@ -189,21 +199,6 @@
 			router.on('route:home', function() {
 				movieColl.fetch();
 			});
-
-			//var filteredcollection = movieColl.pluck('title');
-			//console.log("filteredcollection:", filteredcollection);	
-			// var fil = movieColl.map(function(model) {
-			// 	return model.get('title');
-			// })
-			// $("#movie-input").autocomplete({
-			// 	source: filteredcollection,
-			// 	minLength : 2,
-			// 	select: function(event, ui) {
-			// 		var selectedmovie = movieColl.where({name: ui.item.value})[0];
-			// 		var movieList = new MovieList({model:selectedmovie});
-			// 		movieList.render();
-			// 	}
-			// });
 
 			Backbone.history.start();
 		})
