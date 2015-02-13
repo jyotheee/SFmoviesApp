@@ -4,9 +4,9 @@ This app was built as a part of the uber coding challenge. It lists all the movi
 
 ##Technology stack
 
-The frontend was built using backbone MVC framework. It uses Backbone.js, Underscore.js, jQuery and GoogleMaps API. 
+The frontend was built using backbone MVC framework. It uses Backbone.js, Underscore.js, jQuery and GoogleMaps API. There are three views to the Backbone model. The first view is to display the entire list of movies from the backend into a DOM element. This view provides an autocomplete feature on the form field that listens to 'keyup' events. Each movie displayed in the list has a separate view. This view listens to click events on its name and send the information to the maps view, which is the third one. The maps view geolocates the address and adds a marker on the map.
 
-Backend consists of a SQLite database, SQLAlchemy and a Flask framework for python. Data is downloaded from [DataSF:FilmLocations] (https://data.sfgov.org/Culture-and-Recreation/Film-Locations-in-San-Francisco/yitu-d5am?) into a csv file. The database is seeded (seed.py) from this CSV file and stored as a Movie model (model.py) into the database table.
+Backend consists of a SQLite database, SQLAlchemy and a Flask framework for python. Data is downloaded from [DataSF:FilmLocations] (https://data.sfgov.org/Culture-and-Recreation/Film-Locations-in-San-Francisco/yitu-d5am?) into a csv file. The database is seeded (seed.py) from this CSV file and stored as a 'Movie' model (model.py) into the database table. Queries are written with SQLAlchemy to fetch the data and convert them into JSON objects (RESTful) to be sent as a collection to the frontend view. 
 
 ##Experience
 
