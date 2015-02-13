@@ -9,6 +9,11 @@ body
 	background-color: #C8DAA3;
 }
 
+h5 {
+	margin-left: 35%;
+	font-style: italic;
+}
+
 #movieBox {
 	width: 300px;
 	margin-left: 0;
