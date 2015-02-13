@@ -4,7 +4,9 @@ import json
 import unittest
 import model
 
+# Test cases to check the geolocation of a zipcode/search term using GoogleMapsAPI
 
+#Helper function to calculate the geolocation based on zipcode
 def geocode_zipcode(zipcode):
 	
 	resp =requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=%s' %(zipcode))
@@ -17,6 +19,7 @@ def geocode_zipcode(zipcode):
 	
 	return zip_coord
 
+#Helper function to calculate the geolocation based on a given search term
 def geocode_searchterm(searchterm):
 	
 	resp =requests.get('https://maps.googleapis.com/maps/api/geocode/json?&address=%s' %(searchterm))
@@ -27,11 +30,9 @@ def geocode_searchterm(searchterm):
 
 	zip_coord = (lat, lng)
 
-	print "zip_coord:", zip_coord
-	
 	return zip_coord
 
-
+# Unit tests to check the above two functions
 class MovieAppTestFunctions(unittest.TestCase):
 
 	def test_coordinates(self):
@@ -45,7 +46,6 @@ class MovieAppTestFunctions(unittest.TestCase):
 		test_coordinate = (37.8199286, -122.4782551)
 
 		self.assertEqual(geocode_searchterm(searchterm), test_coordinate)
-
 
 def main():
 	unittest.main()
