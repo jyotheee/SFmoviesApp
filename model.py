@@ -27,7 +27,6 @@ def connect():
     return dbsession()
 
 def main():
-    """In case we need this for something"""
     createTable()
 
 if __name__ == "__main__":
