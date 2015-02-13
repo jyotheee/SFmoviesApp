@@ -5,6 +5,10 @@ import unittest
 import model
 from model import Movie
 
+#Test case to check the database setup
+
+#Add an entry to the db and check the db update on the new entry
+
 class TestDBFunctions(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):

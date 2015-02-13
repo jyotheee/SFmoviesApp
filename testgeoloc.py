@@ -4,7 +4,7 @@ import json
 import unittest
 import model
 
-# Test cases to check the geolocation of a zipcode/search term using GoogleMapsAPI
+#Test cases to check the geolocation of a zipcode/search term using GoogleMapsAPI
 
 #Helper function to calculate the geolocation based on zipcode
 def geocode_zipcode(zipcode):
