@@ -16,7 +16,7 @@ def index():
 def getmoviesfromdb():
     movie_list = model.dbsession.query(model.Movie).all()
     
-    # make a dictionary of all the movies
+    # make a dictionary of all the movies in the database. Each movie can map to many locations
     output = {}
     for movie in movie_list:
     	if movie.title in output:
@@ -24,7 +24,7 @@ def getmoviesfromdb():
     	else:
     		output[movie.title] = [movie.location]
 
-    # make an array of objects from the above dictionary
+    # make an array of objects from the above dictionary to send to frontend view
     outlist = []
     for k,v in output.items():
     	moviedict = {}
@@ -32,12 +32,7 @@ def getmoviesfromdb():
     	moviedict['location'] = v
     	outlist.append(moviedict)
 
-    return jsonify(collection=outlist)
-    #return jsonify(collection=[i.json_view() for i in movie_list])
-
-def json_view(self):
-	return {title: self.title, location: self.location}
-    
+    return jsonify(collection=outlist)    
     
 if __name__ == '__main__':
     app.run()
