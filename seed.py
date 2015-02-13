@@ -2,9 +2,8 @@ import model
 from model import Movie
 import csv
 
+#importing movie info from data/Film_Locations_in_San_Francisco.csv
 def load_movies(session):
-    #using Film_Locations_in_San_Francisco.csv
-
     with open('data/Film_Locations_in_San_Francisco.csv', 'rb') as csvfile:
         moviedata = csv.reader(csvfile, delimiter = ",")
         for row in moviedata:
@@ -15,7 +14,7 @@ def load_movies(session):
         session.commit()
 
 def main(session):
-    # You'll call each of the load_* functions with the session as an argument
+    # Loading all the movies from the CSV file to the database session
     load_movies(session)
     pass
 
