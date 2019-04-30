@@ -5,11 +5,11 @@
 		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
 
-		<script src="//maps.googleapis.com/maps/api/js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" type="text/javascript"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key="+{{ mapskey['key'] }}></script>
   		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js" type="text/javascript"></script>
-  		<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>		
+  		<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
 	</head>
 
 	<body>
@@ -27,7 +27,9 @@
 			<div id="googleMap" style="width:600px;height:600px;"></div>
 		</div>
 
-		<script>
+		<script id="backbonescript">
+
+			
 
 		$(function() { 
 
@@ -141,6 +143,7 @@
 
 				updateMap: function(movie) {
 					var movieLocations = movie.get('location');
+					var gmapskey = "{{ mapskey['key'] }}";
 
 					//clear existing markers on the map
 					if (this.markers.length > 0) {
@@ -152,9 +155,12 @@
 
 					//geolocate the address from searchterm and add new markers to the map
 					var that = this;
+					//var mapsapikey = config.API_KEY;
 					for (var i = 0; i < movieLocations.length; i++) {
 						searchloc = encodeURIComponent(movieLocations[i]+' san francisco, ca');
-						$.get('http://maps.google.com/maps/api/geocode/json?&address='+searchloc, function(response) {
+						console.log("searchloc is", searchloc)
+						$.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+searchloc+'&key='+gmapskey, function(response) {
+							console.log("response is", response)
 							pos = response.results[0].geometry.location;
 							var marker = new google.maps.Marker({
 								position: new google.maps.LatLng(pos.lat, pos.lng),
