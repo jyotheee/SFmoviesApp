@@ -20,7 +20,7 @@ I've read about frontend testing frameworks such as Mocha.js for testing Backbon
 
 ##Links
 
-[Amazon EC2 SFMoviesApp] (http://54.213.234.172:8000/)
+[Amazon EC2 SFMoviesApp] (http://35.167.205.240:8000/)
 
 [Hackbright Project] (https://github.com/jyotheee/playWithRTC)
 
